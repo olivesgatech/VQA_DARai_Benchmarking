@@ -1,0 +1,8 @@
+{
+    "dataset_root": "/mnt/Data1/RGB_sd",
+    "sequence_length": 16,
+    "csv_filename": "output_answers_blip.csv",
+    "question": ["What is this person doing?","Describe the scene and the action." , "Describe the step to complete this task." , "What is this person planning to do?" , "What is this person interacting with?"],
+    "max_new_tokens": 100,
+    "seed": 42
+}
