@@ -4,8 +4,11 @@ from transformers import BitsAndBytesConfig, LlavaNextVideoForConditionalGenerat
 from transformers import AutoModelForCausalLM, AutoProcessor
 from transformers import *
 
-
+import random
 import torch
+
+from transformers import InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
+
 from transformers import BitsAndBytesConfig, LlavaNextVideoForConditionalGeneration, LlavaNextVideoProcessor
 from transformers import AutoModelForCausalLM, AutoProcessor
 
