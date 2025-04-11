@@ -54,8 +54,8 @@ def load_model_and_processor_instruct_blip_video(model_name="Salesforce/instruct
             model, processor: The loaded model and processor
     '''
 
-    processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-vicuna-7b", device_map= {"": "cuda:0"})
     model = InstructBlipVideoForConditionalGeneration.from_pretrained("Salesforce/instructblip-vicuna-7b")
+    processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-vicuna-7b")
 
     return model, processor
 
