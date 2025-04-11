@@ -3,6 +3,8 @@ VQA_DARai_Benchmarking is a benchmarking framework designed for evaluating Visua
 
 ## Current Model
 - **LLaVA-NeXT-Video**
+- **LLaMa3-Video**
+- **InstructBlipVideo**
   
 ## Installation
 To use this benchmarking tool, clone the repository and install the required dependencies:

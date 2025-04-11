@@ -1,8 +1,11 @@
 {
-    "dataset_root": "/mnt/Data1/RGB_sd",
-    "sequence_length": 4,
-    "csv_filename": "output_answers_blip_instruct_video.csv",
-    "question": ["What is this person doing?","Describe the scene and the action." , "Describe the step to complete this task." , "What is this person planning to do?" , "What is this person interacting with?"],
-    "max_new_tokens": 250,
+    "dataset_root": "/mnt/data-tmp/ghazal/DARai_DATA/RGB_sd",
+
+
+
+    "sequence_length": 16,
+    "csv_filename": "blip_instruct_output_answers.csv",
+    "question": ["What is this person doing?","Describe the scene and the action." , "Describe the action step to complete the task shown" , "What is this person planning to do?" , "What is this person interacting with?"],
+    "max_new_tokens": 800,
     "seed": 1000
 }

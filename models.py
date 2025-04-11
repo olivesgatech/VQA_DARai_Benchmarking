@@ -3,11 +3,11 @@ from torchvision.transforms import ToPILImage
 from transformers import BitsAndBytesConfig, LlavaNextVideoForConditionalGeneration, LlavaNextVideoProcessor
 from transformers import AutoModelForCausalLM, AutoProcessor
 from transformers import *
-
-
+import bitsandbytes
 import torch
 from transformers import BitsAndBytesConfig, LlavaNextVideoForConditionalGeneration, LlavaNextVideoProcessor
 from transformers import AutoModelForCausalLM, AutoProcessor
+
 
 def load_Llava_model_and_processor(model_name="llava-hf/LLaVA-NeXT-Video-7B-hf"):
     """
@@ -25,7 +25,7 @@ def load_Llava_model_and_processor(model_name="llava-hf/LLaVA-NeXT-Video-7B-hf")
         "llava-hf/LLaVA-NeXT-Video-7B-hf",
         quantization_config=quantization_config,
         # device_map='auto'
-        device_map= {"": "cuda:0"}
+        device_map={"": "cuda:0"}
     )
     return model, processor
 
@@ -42,10 +42,11 @@ def load_LLaMA3_model_and_processor(model_name="DAMO-NLP-SG/VideoLLaMA3-2B"):
         trust_remote_code=True,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        #attn_implementation="flash_attention_2",
+        # attn_implementation="flash_attention_2",
     )
     processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
     return model, processor
+
 
 def load_model_and_processor_instruct_blip_video(model_name="Salesforce/instructblip-vicuna-7b"):
     '''
@@ -54,9 +55,20 @@ def load_model_and_processor_instruct_blip_video(model_name="Salesforce/instruct
             model, processor: The loaded model and processor
     '''
 
-    processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-vicuna-7b", device_map= {"": "cuda:0"})
-    model = InstructBlipVideoForConditionalGeneration.from_pretrained("Salesforce/instructblip-vicuna-7b")
+    model = InstructBlipVideoForConditionalGeneration.from_pretrained("Salesforce/instructblip-vicuna-7b",
+                                                                      load_in_8bit=True, device_map = "cuda:0")
+                                                                      # load_in_8bit=True, device_map='auto')
+    # print(f"______________Model_______________ \n {model}")
+    # for name, param in model.named_parameters():
+    #     print(f"{name} is on {param.device}")
+    # print(f"_____________________Model Config____________________ \n {model.config}")
+    # print(f"Number of query tokens: {model.config.num_query_tokens}")
 
+    # Update the number of query tokens
+    model.config.num_query_tokens = 128   # 32 * 4
+
+    processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-vicuna-7b")
+    processor.num_query_tokens = model.config.num_query_tokens
     return model, processor
 
 
@@ -114,7 +126,7 @@ def LLaMA3_generate_answer(instance, question, model, processor, max_tokens):
         {
             "role": "user",
             "content": [
-                {"type": "video", "video": {"video_path": instance, "fps": 1, "max_frames": 5}},
+                {"type": "video", "video": {"video_path": instance, "fps": 1, "max_frames": 6}},
                 {"type": "text", "text": question},
             ]
         },
@@ -124,12 +136,13 @@ def LLaMA3_generate_answer(instance, question, model, processor, max_tokens):
     inputs = {k: v.cuda() if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
     if "pixel_values" in inputs:
         inputs["pixel_values"] = inputs["pixel_values"].to(torch.bfloat16)
-    output_ids = model.generate(**inputs, max_new_tokens = max_tokens)
+    output_ids = model.generate(**inputs, max_new_tokens=max_tokens)
     response = processor.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
     print(response)
     return response
 
-def instruct_blip_generate_answer(instance, question, processor, model, max_new_tokens=100):
+
+def instruct_blip_generate_answer(instance, question, processor, model, max_new_tokens):
     """
     Generates an answer from the InstructBlipVideo model based on a given question and a video sample of 4 image frames.
     Returns: the cleaned answer
@@ -144,13 +157,14 @@ def instruct_blip_generate_answer(instance, question, processor, model, max_new_
     # #reduce frame_images to 4 random frames
     # frame_images = random.sample(frame_images, 4)
 
-    prompt = question
+    prompt = "In this video, " + question
+    # prompt = question
     inputs = processor(
-        text=prompt, 
+        text=prompt,
         images=frames,
         return_tensors="pt"
     ).to(model.device)
-    
+
     outputs = model.generate(
         **inputs,
         do_sample=False,
@@ -160,4 +174,7 @@ def instruct_blip_generate_answer(instance, question, processor, model, max_new_
         length_penalty=1.0,
     )
     answer = processor.batch_decode(outputs, skip_special_tokens=True)[0].strip()
-    return answer
+    cleaned_answer = answer.replace(prompt, "")
+    print(f"prompt: {prompt} \n answer: {cleaned_answer}")
+    return cleaned_answer
+

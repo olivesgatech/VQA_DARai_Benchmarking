@@ -1,6 +1,6 @@
 import argparse
 from utils import set_seed
-from generator import LLaVa_NeXT_Video_generator , LLaMA3_Video_generator , Instruct_Blip_Video_generator
+from generators import LLaVa_NeXT_Video_generator , LLaMA3_Video_generator , Instruct_Blip_Video_generator
 # To-Do: Add more generators in the future and import them here
 
 def main():

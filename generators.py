@@ -117,7 +117,7 @@ def LLaMA3_Video_generator(config_filename):
             video_path, activity, camera, ids = dataset[idx]
             subject_id, session_id = ids
             questions = cfg["question"]
-            max_tokens = cfg.get("max_new_tokens", 250)
+            max_tokens = cfg.get("max_new_tokens", 300)
             for question in questions:
                 answer = LLaMA3_generate_answer(video_path, question, model, processor, max_tokens)
                 output_entry = {
@@ -163,7 +163,7 @@ def Instruct_Blip_Video_generator(config_filename):
     csv_filename = cfg.get("csv_filename", "output_answers_instruct_blip_video.csv")
     questions = cfg.get("question") #List of questions
 
-    max_new_tokens = cfg.get("max_new_tokens", 100)
+    max_new_tokens = cfg.get("max_new_tokens", 300)
 
 
     # Load the dataset
@@ -208,7 +208,8 @@ def Instruct_Blip_Video_generator(config_filename):
                                                                "question", "answer"])
                         writer.writerow(output_entry)
 
-                    print(f"Processed sample {idx}, Question: {question}")
+                    # print(f"Processed sample {idx}, Quetion: {question} \n Answer: {answer}")
+                    print(f"Processed sample {idx}")
 
                 except Exception as qe:
                     print(f"Error processing question '{question}' for sample {idx}: {qe}")
